@@ -168,6 +168,36 @@ function addEmployee(){
 })
 }
 
+function updateEmployee(){
+  inquirer
+  .prompt([
+      {
+        type: 'list',
+        choices: managerList,
+        message: "Which employee do you want to update?",
+        name: 'employee'
+      },
+      {
+        type: 'list',
+        choices: roleList,
+        message: "What is the employee's new role?",
+        name: 'newRole'
+      }
+  ])
+  .then((response)=>{
+    roleId = (roleList.indexOf(response.newRole)+1)
+    managerId = (managerList.indexOf(response.employee)+1);
+    
+    db.query(`UPDATE employee SEt role_id = ? WHERE id = ?`,[roleId,managerId], (err, result) => {
+      if (err) {
+        console.log(err);
+      }
+      console.log(`Updated employee: ${response.employee}`);
+      continueYN();
+    })
+})
+}
+
 function mainMenu() {
 
     inquirer
@@ -213,6 +243,13 @@ function mainMenu() {
               roleListGenerator();
               managerListGenerator();
               addEmployee();
+            }else if(response.action === 'Update an employee role'){
+              roleListGenerator();
+              managerListGenerator();
+              managerList.shift();
+              setTimeout(updateEmployee,500);
+            }else{
+              process.exit(1);
             }
         })
 }
