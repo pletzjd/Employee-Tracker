@@ -1,8 +1,35 @@
 const inquirer = require('inquirer');
-const sql = require('mysql2');
+const mysql = require('mysql2');
 const cTable = require('console.table');
 
-let dontQuit = true;
+const db = mysql.createConnection(
+    {
+      host: 'localhost',
+      user: 'root',
+      password: '',
+      database: 'employees'
+    },
+    console.log(`Connected to the courses_db database.`)
+  );
+
+function continueYN(){
+  inquirer
+  .prompt([
+      {
+          type: 'list',
+          choices: ['Yes', 'No'],
+          message: 'Would you like to do something else?',
+          name: 'continue'
+      }
+  ])
+  .then((response)=>{
+    if(response.continue === 'Yes'){
+    mainMenu();
+  }else{
+    console.log('Bye')
+    process.exit(1);
+  }})
+};
 
 function mainMenu() {
     inquirer
@@ -16,10 +43,13 @@ function mainMenu() {
         ])
         .then((response)=>{
             if(response.action === 'View all departments'){
-                mainMenu()
-            }else{
-                console.log('Bye')
-                return
+                db.query(`SELECT * FROM department`, (err, result) => {
+                    if (err) {
+                      console.log(err);
+                    }
+                    console.log(result);
+                    continueYN();
+                  });
             }
         })
 }
