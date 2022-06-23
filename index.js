@@ -43,13 +43,21 @@ function mainMenu() {
         ])
         .then((response)=>{
             if(response.action === 'View all departments'){
-                db.query(`SELECT * FROM department`, (err, result) => {
+                db.query(`SELECT department.name AS "Department Name", department.id AS "Department ID" FROM department`, (err, result) => {
                     if (err) {
                       console.log(err);
                     }
                     console.log(result);
                     continueYN();
                   });
+            }else if(response.action === 'View all roles'){
+              db.query(`SELECT role.title, role.id AS "role id", department.name AS "department", role.salary FROM department INNER JOIN role ON department.id = role.department_id`, (err, result) => {
+                if (err) {
+                  console.log(err);
+                }
+                console.log(result);
+                continueYN();
+              });
             }
         })
 }
