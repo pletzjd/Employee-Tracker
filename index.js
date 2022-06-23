@@ -1,7 +1,9 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
 const cTable = require('console.table');
-let departmentList = []
+let departmentList = [];
+let roleList = [];
+let managerList = [];
 
 const db = mysql.createConnection(
     {
@@ -64,6 +66,31 @@ function departmentListGenerator(){
   });
 }
 
+function roleListGenerator(){
+  roleList = []
+  db.query(`SELECT role.title, role.id FROM role ORDER BY id;`, (err, result) => {
+    if (err) {
+      console.log(err);
+    }
+    for (let i=0;i<result.length;i++){
+      roleList.push(result[i].title);
+    }
+  });
+}
+
+function managerListGenerator(){
+  managerList = []
+  db.query(`SELECT employee.first_name, employee.last_name, employee.id FROM employee ORDER BY id;`, (err, result) => {
+    if (err) {
+      console.log(err);
+    }
+    for (let i=0;i<result.length;i++){
+      managerList.push(result[i].first_name.concat(" ",result[i].last_name));
+    }
+  });
+  managerList.unshift('None')
+}
+
 function addRole(){
 
   inquirer
@@ -87,12 +114,55 @@ function addRole(){
   ])
   .then((response)=>{
     departmentId = (departmentList.indexOf(response.department)+1)
-    console.log(departmentId)
     db.query(`INSERT INTO role (title, salary, department_id) VALUES(?,?,?)`,[response.role,response.salary,departmentId], (err, result) => {
       if (err) {
         console.log(err);
       }
       console.log(`Added Role: ${response.role}`);
+      continueYN();
+    })
+})
+}
+
+function addEmployee(){
+  inquirer
+  .prompt([
+      {
+          type: 'input',
+          message: "What is the employee's first name?",
+          name: 'fname'
+      },
+      {
+        type: 'input',
+        message: "What is the employee's last name?",
+        name: 'lname'
+      },
+      {
+        type: 'list',
+        choices: roleList,
+        message: "What is the employee's role?",
+        name: 'role'
+      },
+      {
+        type: 'list',
+        choices: managerList,
+        message: "Who is the employee's manager?",
+        name: 'manager'
+      }
+  ])
+  .then((response)=>{
+    roleId = (roleList.indexOf(response.role)+1)
+    if(managerList.indexOf(response.manager) === 0){
+      managerId = null;
+      console.log(managerId)
+    }else{
+      managerId = managerList.indexOf(response.manager);
+    }
+    db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES(?,?,?,?)`,[response.fname,response.lname,roleId,managerId], (err, result) => {
+      if (err) {
+        console.log(err);
+      }
+      console.log(`Added Employee: ${response.fname} ${response.lname}`);
       continueYN();
     })
 })
@@ -139,6 +209,10 @@ function mainMenu() {
             }else if(response.action === 'Add a role'){
               departmentListGenerator()
               addRole();
+            }else if(response.action === 'Add an employee'){
+              roleListGenerator();
+              managerListGenerator();
+              addEmployee();
             }
         })
 }
