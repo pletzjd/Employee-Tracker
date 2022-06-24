@@ -154,7 +154,6 @@ function addEmployee(){
     roleId = (roleList.indexOf(response.role)+1)
     if(managerList.indexOf(response.manager) === 0){
       managerId = null;
-      console.log(managerId)
     }else{
       managerId = managerList.indexOf(response.manager);
     }
@@ -215,7 +214,7 @@ function mainMenu() {
                     if (err) {
                       console.log(err);
                     }
-                    console.log(result);
+                    console.table(result);
                     continueYN();
                   });
             }else if(response.action === 'View all roles'){
@@ -223,7 +222,7 @@ function mainMenu() {
                 if (err) {
                   console.log(err);
                 }
-                console.log(result);
+                console.table(result);
                 continueYN();
               });
             }else if(response.action === 'View all employees'){
@@ -231,7 +230,7 @@ function mainMenu() {
                 if (err) {
                   console.log(err);
                 }
-                console.log(result);
+                console.table(result);
                 continueYN();
               })
             }else if(response.action === 'Add a department'){
